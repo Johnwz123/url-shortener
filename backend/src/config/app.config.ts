@@ -5,6 +5,9 @@ export type AppConfig = {
   frontendNotFoundPath: string;
   corsOrigin?: string;
   nodeEnv: string;
+  shortCodeGenerationMinLength: number;
+  shortCodeGenerationMaxLength: number;
+  shortCodeGenerationMaxAttempts: number;
 };
 
 const stripTrailingSlash = (value: string): string => value.replace(/\/+$/, "");
@@ -18,4 +21,7 @@ export const loadConfig = (env: NodeJS.ProcessEnv = process.env): AppConfig => (
   frontendNotFoundPath: env.FRONTEND_NOT_FOUND_PATH ?? "/404",
   corsOrigin: env.CORS_ORIGIN,
   nodeEnv: env.NODE_ENV ?? "development",
+  shortCodeGenerationMinLength: Number(env.SHORT_CODE_GENERATION_MIN_LENGTH ?? 6),
+  shortCodeGenerationMaxLength: Number(env.SHORT_CODE_GENERATION_MAX_LENGTH ?? 10),
+  shortCodeGenerationMaxAttempts: Number(env.SHORT_CODE_GENERATION_MAX_ATTEMPTS ?? 10),
 });

@@ -4,6 +4,7 @@ import type { NextFunction, Request, Response } from "express";
 import type { AppConfig } from "./config/app.config.js";
 import { AppError, isAppError } from "./errors.js";
 import type { AppRepositories } from "./repositories/app.repositories.js";
+import { generateShortCode } from "./services/short-code.service.js";
 import { createShortUrl, findOriginalUrl } from "./services/url.service.js";
 
 export type CreateAppOptions = {
@@ -45,6 +46,19 @@ export const createApp = ({ config, repositories }: CreateAppOptions) => {
         config.publicBaseUrl,
       );
       res.status(201).json(result);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/short-codes/generate", async (_req, res, next) => {
+    try {
+      const shortCode = await generateShortCode(repositories.urlMappings, {
+        minLength: config.shortCodeGenerationMinLength,
+        maxLength: config.shortCodeGenerationMaxLength,
+        maxAttempts: config.shortCodeGenerationMaxAttempts,
+      });
+      res.status(200).json({ shortCode });
     } catch (error) {
       next(error);
     }

@@ -45,6 +45,9 @@ export PUBLIC_BASE_URL="http://localhost:3000"
 export FRONTEND_BASE_URL="http://localhost:5173"
 export FRONTEND_NOT_FOUND_PATH="/404"
 export CORS_ORIGIN="http://localhost:5173"
+export SHORT_CODE_GENERATION_MIN_LENGTH="6"
+export SHORT_CODE_GENERATION_MAX_LENGTH="10"
+export SHORT_CODE_GENERATION_MAX_ATTEMPTS="10"
 ```
 
 PowerShell:
@@ -55,6 +58,9 @@ $env:PUBLIC_BASE_URL="http://localhost:3000"
 $env:FRONTEND_BASE_URL="http://localhost:5173"
 $env:FRONTEND_NOT_FOUND_PATH="/404"
 $env:CORS_ORIGIN="http://localhost:5173"
+$env:SHORT_CODE_GENERATION_MIN_LENGTH="6"
+$env:SHORT_CODE_GENERATION_MAX_LENGTH="10"
+$env:SHORT_CODE_GENERATION_MAX_ATTEMPTS="10"
 ```
 
 ## Database Connection
@@ -163,6 +169,7 @@ curl.exe -I http://localhost:3000/google
 Routes:
 
 - `POST /api/urls`: create a short URL with required `originalUrl` and `shortCode`
+- `POST /api/short-codes/generate`: generate a unique short code
 - `GET /:code`: redirect to the stored original URL
 - `GET /health`: health check
 
