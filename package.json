@@ -1,0 +1,29 @@
+{
+  "name": "url-shortener-stack",
+  "private": true,
+  "engines": {
+    "bun": ">=1.2.0",
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "install:all": "cd backend && bun install && cd ../frontend && bun install",
+    "install:backend": "cd backend && bun install",
+    "install:frontend": "cd frontend && bun install",
+    "dev": "concurrently \"cd backend && bun run dev\" \"cd frontend && bun run dev\"",
+    "dev:backend": "cd backend && bun run dev",
+    "dev:frontend": "cd frontend && bun run dev",
+    "build": "cd backend && bun run build && cd ../frontend && bun run build",
+    "build:backend": "cd backend && bun run build",
+    "build:frontend": "cd frontend && bun run build",
+    "lint": "cd backend && bun run lint && cd ../frontend && bun run lint",
+    "lint:backend": "cd backend && bun run lint",
+    "lint:frontend": "cd frontend && bun run lint",
+    "test": "cd backend && bun run test && cd ../frontend && bun run test",
+    "test:backend": "cd backend && bun run test",
+    "test:frontend": "cd frontend && bun run test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.5.3"
+  }
+}
