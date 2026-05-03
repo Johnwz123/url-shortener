@@ -30,7 +30,7 @@ const sendError = (res: Response, error: AppError): void => {
 export const createApp = ({ config, repositories }: CreateAppOptions) => {
   const app = express();
 
-  app.use(cors({ origin: config.corsOrigin ?? true }));
+  app.use(cors({ origin: config.corsOrigin ?? config.frontendBaseUrl }));
   app.use(express.json());
 
   app.get("/health", (_req, res) => {
