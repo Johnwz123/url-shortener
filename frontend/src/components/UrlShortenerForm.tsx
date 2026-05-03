@@ -40,13 +40,13 @@ export const UrlShortenerForm = ({ apiBaseUrl }: UrlShortenerFormProps) => {
     } catch (error) {
       if (error instanceof ApiClientError) {
         setFieldErrors(error.fieldErrors ?? {});
-        
+
         switch (error.code) {
-        case "SHORT_CODE_TAKEN":
-          setFormError("This short code is already taken. Choose a different short code.");
-          break;
-        default:
-          setFormError(error.message);
+          case "SHORT_CODE_TAKEN":
+            setFormError("This short code is already taken. Choose a different short code.");
+            break;
+          default:
+            setFormError(error.message);
         }
       } else {
         setFormError("Something went wrong.");
