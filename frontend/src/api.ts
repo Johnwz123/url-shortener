@@ -12,6 +12,10 @@ export type CreateShortUrlResponse = {
   updatedAt: string;
 };
 
+export type GenerateShortCodeResponse = {
+  shortCode: string;
+};
+
 export type ApiErrorBody = {
   error?: {
     code?: string;
@@ -61,4 +65,27 @@ export const createShortUrl = async (
   }
 
   return body as CreateShortUrlResponse;
+};
+
+export const generateShortCode = async (apiBaseUrl: string): Promise<GenerateShortCodeResponse> => {
+  const response = await fetch(apiUrl(apiBaseUrl, "/api/short-codes/generate"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const body = (await response.json()) as GenerateShortCodeResponse | ApiErrorBody;
+
+  if (!response.ok) {
+    const error = (body as ApiErrorBody).error;
+    throw new ApiClientError(
+      response.status,
+      error?.code ?? "REQUEST_FAILED",
+      error?.message ?? "Request failed.",
+      error?.fieldErrors,
+    );
+  }
+
+  return body as GenerateShortCodeResponse;
 };

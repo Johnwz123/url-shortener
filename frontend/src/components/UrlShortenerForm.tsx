@@ -1,7 +1,7 @@
 import { Alert, Box, Button, Container, Link, Stack, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import type { SyntheticEvent } from "react";
-import { ApiClientError, createShortUrl } from "../api";
+import { ApiClientError, createShortUrl, generateShortCode } from "../api";
 import type { CreateShortUrlResponse } from "../api";
 
 type UrlShortenerFormProps = {
@@ -15,6 +15,39 @@ export const UrlShortenerForm = ({ apiBaseUrl }: UrlShortenerFormProps) => {
   const [formError, setFormError] = useState("");
   const [result, setResult] = useState<CreateShortUrlResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const clearShortCodeError = () => {
+    setFieldErrors((current) => {
+      const rest = { ...current };
+      delete rest.shortCode;
+      return rest;
+    });
+  };
+
+  const handleGenerate = async () => {
+    setFormError("");
+    setResult(null);
+    clearShortCodeError();
+    setIsGenerating(true);
+
+    try {
+      const response = await generateShortCode(apiBaseUrl);
+      setShortCode(response.shortCode.toLowerCase());
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        if (error.code === "SHORT_CODE_GENERATION_FAILED") {
+          setFormError("Unable to generate a short code. Please try again.");
+        } else {
+          setFormError(error.message);
+        }
+      } else {
+        setFormError("Something went wrong.");
+      }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleSubmit = async (event: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
     event.preventDefault();
@@ -70,9 +103,7 @@ export const UrlShortenerForm = ({ apiBaseUrl }: UrlShortenerFormProps) => {
             <Typography variant="h4" component="h1">
               URL Shortener
             </Typography>
-            <Typography color="text.secondary">
-              Create a short link with your own code.
-            </Typography>
+            <Typography color="text.secondary">Create a short link with your own code.</Typography>
           </Stack>
 
           <Stack component="form" spacing={2} onSubmit={handleSubmit} noValidate>
@@ -85,15 +116,26 @@ export const UrlShortenerForm = ({ apiBaseUrl }: UrlShortenerFormProps) => {
               required
               fullWidth
             />
-            <TextField
-              label="Short code"
-              value={shortCode}
-              onChange={(event) => setShortCode(event.target.value.toLowerCase())}
-              error={Boolean(fieldErrors.shortCode)}
-              helperText={fieldErrors.shortCode}
-              required
-              fullWidth
-            />
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField
+                label="Short code"
+                value={shortCode}
+                onChange={(event) => setShortCode(event.target.value.toLowerCase())}
+                error={Boolean(fieldErrors.shortCode)}
+                helperText={fieldErrors.shortCode}
+                required
+                fullWidth
+              />
+              <Button
+                type="button"
+                variant="outlined"
+                onClick={handleGenerate}
+                disabled={isGenerating || isSubmitting}
+                sx={{ alignSelf: { sm: "center" }, whiteSpace: "nowrap" }}
+              >
+                {isGenerating ? "Generating..." : "Generate"}
+              </Button>
+            </Stack>
 
             {formError ? <Alert severity="error">{formError}</Alert> : null}
 
