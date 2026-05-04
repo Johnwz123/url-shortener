@@ -20,7 +20,7 @@ const generateRandomShortCode = (length: number): string =>
   Array.from({ length }, () => SHORT_CODE_CHARSET[randomInt(SHORT_CODE_CHARSET.length)]).join("");
 
 const selectRandomLength = (minLength: number, maxLength: number): number => {
-  if (!Number.isFinite(minLength) || !Number.isFinite(maxLength) || minLength <= 0) {
+  if (!Number.isFinite(minLength) || !Number.isFinite(maxLength)) {
     throw new AppError(
       500,
       "SHORT_CODE_GENERATION_FAILED",
@@ -28,12 +28,23 @@ const selectRandomLength = (minLength: number, maxLength: number): number => {
     );
   }
 
-  if (minLength === maxLength) {
-    return minLength;
+  const flooredMin = Math.floor(minLength);
+  const flooredMax = Math.floor(maxLength);
+
+  if (flooredMin <= 0) {
+    throw new AppError(
+      500,
+      "SHORT_CODE_GENERATION_FAILED",
+      "Unable to generate a short code. Please try again.",
+    );
   }
 
-  const normalizedMin = Math.min(minLength, maxLength);
-  const normalizedMax = Math.max(minLength, maxLength);
+  if (flooredMin === flooredMax) {
+    return flooredMin;
+  }
+
+  const normalizedMin = Math.min(flooredMin, flooredMax);
+  const normalizedMax = Math.max(flooredMin, flooredMax);
   return randomInt(normalizedMin, normalizedMax + 1);
 };
 
