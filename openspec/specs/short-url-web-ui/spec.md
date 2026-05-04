@@ -8,7 +8,7 @@ TBD
 
 ### Requirement: Provide URL creation form
 
-The frontend SHALL provide a form for creating shortened URLs from original URLs and required short codes.
+The frontend SHALL provide a form for creating shortened URLs from original URLs and required short codes, including a generate action that calls the backend to obtain a short code.
 
 #### Scenario: User submits original URL and short code
 
@@ -19,6 +19,11 @@ The frontend SHALL provide a form for creating shortened URLs from original URLs
 
 - **WHEN** a user submits the creation form without a short code
 - **THEN** the frontend displays an inline validation error and does not submit the create request
+
+#### Scenario: User generates a short code
+
+- **WHEN** a user clicks the generate short code button
+- **THEN** the frontend requests a generated short code from the backend and fills the short code input with the returned value
 
 ### Requirement: Show validation errors
 
@@ -37,6 +42,15 @@ The frontend SHALL show a clear conflict error when the requested short code is 
 
 - **WHEN** the backend returns `409 Conflict` with `SHORT_CODE_TAKEN`
 - **THEN** the frontend displays an inline message asking the user to choose a different short code
+
+### Requirement: Show generation failure error
+
+The frontend SHALL show a clear inline error when short code generation fails.
+
+#### Scenario: Backend returns generation failure
+
+- **WHEN** the backend responds with `SHORT_CODE_GENERATION_FAILED`
+- **THEN** the frontend displays a retry message without clearing the user's entered values
 
 ### Requirement: Provide frontend not found page
 
