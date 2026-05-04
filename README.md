@@ -18,7 +18,7 @@ A TypeScript URL shortening service with separate frontend and backend apps.
 
 From the repository root:
 
-```powershell
+```sh
 docker compose up --build
 ```
 
@@ -29,13 +29,13 @@ Then open:
 
 Stop the stack:
 
-```powershell
+```sh
 docker compose down
 ```
 
 ## Install Dependencies
 
-```powershell
+```sh
 bun install
 bun run install:all
 ```
@@ -52,18 +52,48 @@ docker compose up -d postgres
 
 Set backend environment variables in the shell that runs the backend:
 
+macOS/Linux:
+
+```bash
+export DATABASE_URL="postgresql://url_shortener:url_shortener@localhost:5433/url_shortener?schema=public"
+export PUBLIC_BASE_URL="http://localhost:3000"
+export FRONTEND_BASE_URL="http://localhost:5173"
+export FRONTEND_NOT_FOUND_PATH="/404"
+export CORS_ORIGIN="http://localhost:5173"
+export SHORT_CODE_GENERATION_MIN_LENGTH="6"
+export SHORT_CODE_GENERATION_MAX_LENGTH="10"
+export SHORT_CODE_GENERATION_MAX_ATTEMPTS="10"
+bun run prisma:generate
+bun run prisma:migrate
+cd ..
+```
+
+PowerShell:
+
 ```powershell
 $env:DATABASE_URL="postgresql://url_shortener:url_shortener@localhost:5433/url_shortener?schema=public"
 $env:PUBLIC_BASE_URL="http://localhost:3000"
 $env:FRONTEND_BASE_URL="http://localhost:5173"
 $env:FRONTEND_NOT_FOUND_PATH="/404"
 $env:CORS_ORIGIN="http://localhost:5173"
+$env:SHORT_CODE_GENERATION_MIN_LENGTH="6"
+$env:SHORT_CODE_GENERATION_MAX_LENGTH="10"
+$env:SHORT_CODE_GENERATION_MAX_ATTEMPTS="10"
 bun run prisma:generate
 bun run prisma:migrate
 cd ..
 ```
 
 Set the frontend API URL, then start both apps from the root:
+
+macOS/Linux:
+
+```bash
+export VITE_API_BASE_URL="http://localhost:3000"
+bun run dev
+```
+
+PowerShell:
 
 ```powershell
 $env:VITE_API_BASE_URL="http://localhost:3000"
@@ -92,6 +122,16 @@ bun run build:frontend
 
 Create a short URL:
 
+macOS/Linux:
+
+```bash
+curl -X POST http://localhost:3000/api/urls \
+  -H "Content-Type: application/json" \
+  -d '{"originalUrl":"https://open.gov.sg/","shortCode":"open"}'
+```
+
+PowerShell:
+
 ```powershell
 Invoke-RestMethod `
   -Method Post `
@@ -101,6 +141,22 @@ Invoke-RestMethod `
 ```
 
 Visit `http://localhost:3000/open` to be redirected to the original URL.
+
+Generate a short code:
+
+macOS/Linux:
+
+```bash
+curl -X POST http://localhost:3000/api/short-codes/generate
+```
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri "http://localhost:3000/api/short-codes/generate"
+```
 
 Short codes are required. If the requested code is already taken, the backend
 returns `409 Conflict` with `SHORT_CODE_TAKEN`.

@@ -2,6 +2,8 @@ import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
 import type { AppConfig } from "../src/config/app.config.js";
+import { SHORT_CODE_PATTERN } from "../src/validation/url.validation.js";
+import type { UrlMappingRepository } from "../src/repositories/url-mapping.repository.js";
 import { InMemoryUrlMappingRepository } from "./helpers/in-memory-url-mapping.repository.js";
 
 const config: AppConfig = {
@@ -11,11 +13,23 @@ const config: AppConfig = {
   frontendNotFoundPath: "/404",
   corsOrigin: "http://frontend.test",
   nodeEnv: "test",
+  shortCodeGenerationMinLength: 6,
+  shortCodeGenerationMaxLength: 8,
+  shortCodeGenerationMaxAttempts: 5,
 };
 
 const createTestApp = () => {
   const urlMappings = new InMemoryUrlMappingRepository();
   const repositories = { urlMappings };
+
+  return {
+    repositories,
+    app: createApp({ config, repositories }),
+  };
+};
+
+const createTestAppWithRepository = (repository: UrlMappingRepository) => {
+  const repositories = { urlMappings: repository };
 
   return {
     repositories,
@@ -144,5 +158,39 @@ describe("URL API", () => {
     const { app } = createTestApp();
 
     await request(app).get("/health").expect(200, { status: "ok" });
+  });
+
+  it("generates a unique short code", async () => {
+    const { app } = createTestApp();
+
+    const response = await request(app).post("/api/short-codes/generate").expect(200);
+
+    expect(response.body.shortCode).toMatch(SHORT_CODE_PATTERN);
+    expect(response.body.shortCode.length).toBeGreaterThanOrEqual(
+      config.shortCodeGenerationMinLength,
+    );
+    expect(response.body.shortCode.length).toBeLessThanOrEqual(
+      config.shortCodeGenerationMaxLength,
+    );
+  });
+
+  it("returns generation failure errors when no unique short code is found", async () => {
+    const alwaysTakenRepository: UrlMappingRepository = {
+      create: async () => {
+        throw new Error("Not used");
+      },
+      findByShortCode: async () => ({
+        id: "existing",
+        shortCode: "taken",
+        originalUrl: "https://example.com/",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }),
+    };
+    const { app } = createTestAppWithRepository(alwaysTakenRepository);
+
+    const response = await request(app).post("/api/short-codes/generate").expect(503);
+
+    expect(response.body.error.code).toBe("SHORT_CODE_GENERATION_FAILED");
   });
 });

@@ -110,3 +110,46 @@ it("renders short-code conflict errors", async () => {
     await screen.findByText("This short code is already taken. Choose a different short code."),
   ).toBeInTheDocument();
 });
+
+it("generates a short code and fills the input", async () => {
+  mockFetch.mockReturnValueOnce(
+    jsonResponse({
+      shortCode: "auto-123",
+    }),
+  );
+
+  render(<UrlShortenerForm apiBaseUrl="http://api.test" />);
+
+  await userEvent.click(screen.getByRole("button", { name: "Generate" }));
+
+  expect(mockFetch).toHaveBeenCalledWith(
+    "http://api.test/api/short-codes/generate",
+    expect.objectContaining({
+      method: "POST",
+    }),
+  );
+  expect(await screen.findByLabelText(/short code/i)).toHaveValue("auto-123");
+});
+
+it("shows a retry error when short code generation fails", async () => {
+  mockFetch.mockReturnValueOnce(
+    jsonResponse(
+      {
+        error: {
+          code: "SHORT_CODE_GENERATION_FAILED",
+          message: "Unable to generate a short code.",
+        },
+      },
+      false,
+      503,
+    ),
+  );
+
+  render(<UrlShortenerForm apiBaseUrl="http://api.test" />);
+
+  await userEvent.click(screen.getByRole("button", { name: "Generate" }));
+
+  expect(
+    await screen.findByText("Unable to generate a short code. Please try again."),
+  ).toBeInTheDocument();
+});
